@@ -1,0 +1,12 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'com.theFox6'
+//version '1.0-SNAPSHOT'
+
+sourceCompatibility = 11
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+mainClassName = 'com.theFox6.knWrapper.KNWrapper'
