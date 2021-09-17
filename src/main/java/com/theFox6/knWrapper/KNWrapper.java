@@ -90,7 +90,7 @@ public class KNWrapper {
             return;
         }
         if (args.contains(WrapperArgument.UPDATE)) {
-            if (checkForUpdate()) {
+            if (!checkForUpdate()) {
                 System.err.println("update failed");
                 return;
             }
@@ -99,6 +99,14 @@ public class KNWrapper {
             r = rerun();
             if (r.shouldUpdate()) {
                 if (checkForUpdate()) {
+                    instanceProperties.setProperty("state", KNResponse.UPDATED.name());
+                    try {
+                        instanceProperties.store(Files.newBufferedWriter(instanceFile), "KleinerNerd instance properties");
+                    } catch (IOException e) {
+                        System.err.println("could not set to updated state");
+                        e.printStackTrace();
+                    }
+                } else {
                     System.err.println("update failed");
                     return;
                 }
@@ -194,32 +202,32 @@ public class KNWrapper {
 
     /**
      * checks for an update and unpacks/installs it
-     * @return true if the update failed
+     * @return true if the update was successful
      */
     private boolean checkForUpdate() {
         if (!updateFolder.exists()) {
             if (!updateFolder.mkdir()) {
                 System.err.println("updates folder does not exist and cannot be created");
-                return true;
+                return false;
             }
-            return false;
+            return true;
         }
         File[] updates = updateFolder.listFiles();
         if (updates == null) {
             System.err.println("could not list updates folder contents");
-            return true;
+            return false;
         }
         if (updates.length == 0) {
             /* in case there is trouble without update
             if (expectUpdate)
                 System.err.println("update expected but not found");
             */
-            return false;
+            return true;
         }
         if (updates.length > 1) {
             //perhaps support incremental updating
             System.err.println("More than one update found. Not supported yet.");
-            return true;
+            return false;
         }
         //perhaps check if it is a KleinerNerd
         //perhaps backup data
@@ -229,12 +237,12 @@ public class KNWrapper {
         } catch (IOException e) {
             System.err.println("could not unpack zip file: " + e.getMessage());
             e.printStackTrace();
-            return true;
+            return false;
         }
         if (!updates[0].delete()) {
             System.err.println("update was not deleted after unpacking");
         }
-        return false;
+        return true;
     }
 
     private void unpack(File update, File targetFolder) throws IOException {

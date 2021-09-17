@@ -5,11 +5,13 @@ public enum KNResponse {
     OVERRIDE(0b0001),
     @SuppressWarnings("unused")
     UPDATE(0b0110),
-    UPDATED(0b0100),
     @SuppressWarnings("unused")
     SHUTDOWN(0b0001),
     @SuppressWarnings("unused")
     RESTART(0b0100),
+    @SuppressWarnings("unused")
+    STARTING(0b1000),
+    UPDATED(0b0100),
     WRAPPER_ERROR(0b1000),
     /**
      * KleinerNerd state could not be found
