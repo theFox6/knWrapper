@@ -68,8 +68,8 @@ public class KNWrapper {
                 System.err.println("pass --install to install");
                 return;
             }
-            if (checkForUpdate()) {
-                System.err.println("installation from failed");
+            if (!checkForUpdate()) {
+                System.err.println("installation from updates folder failed");
                 return;
             }
             if (!Files.exists(knFolder)) {
@@ -96,7 +96,7 @@ public class KNWrapper {
             }
         }
         do {
-            r = rerun();
+            r = rerun(args);
             if (r.shouldUpdate()) {
                 if (checkForUpdate()) {
                     instanceProperties.setProperty("state", KNResponse.UPDATED.name());
@@ -140,7 +140,7 @@ public class KNWrapper {
         }
     }
 
-    private KNResponse rerun() {
+    private KNResponse rerun(List<WrapperArgument> args) {
         try {
             if (knStandardLog.exists()) {
                 backupLogs(knStandardLog.lastModified());
@@ -152,7 +152,14 @@ public class KNWrapper {
             return KNResponse.WRAPPER_ERROR;
         }
         //perhaps also support windows
-        ProcessBuilder b = new ProcessBuilder("bash", "KleinerNerd", "--no-colorize");
+        List<String> command = new LinkedList<>();
+        command.add("./KleinerNerd");
+        command.add("--no-colorize"); //since we redirect to files
+        if (args.contains(WrapperArgument.FULLLOG))
+            command.add("--fullog");
+        if (args.contains(WrapperArgument.CHECKS))
+            command.add("--checks");
+        ProcessBuilder b = new ProcessBuilder(command);
         b.directory(knFolder.resolve("bin/").toFile());
         b.redirectError(knErrorLog);
         b.redirectOutput(knStandardLog);
@@ -168,7 +175,17 @@ public class KNWrapper {
         }
         KNResponse r = checkState();
         if (r.isUnexpected()) {
-            System.err.println("KleinerNerd quit in unexpected state: " + r.name());
+            System.err.println("KleinerNerd terminated in unexpected state: " + r.name());
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                System.err.println("interrupted while waiting for termination");
+                r = checkState();
+                e.printStackTrace();
+                return r;
+            }
+            r = checkState();
+            System.err.println("After 10 seconds the state is: " + r.name());
             return r;
         }
         try {
@@ -249,6 +266,8 @@ public class KNWrapper {
         // ZipInput stream could probably also do the job
         // perhaps support windows
         // TODO: support tar
+        if (!update.getName().endsWith(".zip"))
+            System.out.println("Only zip files supported for now.");
         ProcessBuilder b = new ProcessBuilder("unzip", "-o", update.getAbsolutePath());
         b.directory(targetFolder);
         b.redirectOutput(unpackLog);

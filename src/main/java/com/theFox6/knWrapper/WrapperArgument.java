@@ -9,7 +9,9 @@ import java.util.stream.Collectors;
 public enum WrapperArgument {
     HELP("h", "help", "shows all command line options"),
     UPDATE("u", "update", "initially check for updates before start"),
-    INSTALL("i", "install", "install KleinerNerd if it is not present");
+    INSTALL("i", "install", "install KleinerNerd if it is not present"),
+    FULLLOG("f", "fullog", "enable full logging mode"),
+    CHECKS("c","checks", "tell KleinerNerd to run checks and then quit without logging on");
 
     private static Map<String, WrapperArgument> shortOpts;
     private static Map<String, WrapperArgument> longOpts;
