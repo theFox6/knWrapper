@@ -95,6 +95,7 @@ public class KNWrapper {
                 return;
             }
         }
+        //TODO: restart after "quit" and not "shutdown", if too many times in a row "quit" do not restart
         do {
             r = rerun(args);
             if (r.shouldUpdate()) {

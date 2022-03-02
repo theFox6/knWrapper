@@ -12,6 +12,8 @@ public enum KNResponse {
     @SuppressWarnings("unused")
     STARTING(0b1000),
     UPDATED(0b0100),
+    @SuppressWarnings("unused")
+    QUIT(0b1000),
     WRAPPER_ERROR(0b1000),
     /**
      * KleinerNerd state could not be found
